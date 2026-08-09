@@ -1,7 +1,7 @@
 import userModel = require("../models/user.model");
 import type { IUser } from "../types/user.interface"
 import type { TimestampedDocument } from "../types/mongoose.types"
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 
 class UserRepository {
     async create(userData: IUser): Promise<TimestampedDocument<IUser>> {
@@ -40,6 +40,16 @@ class UserRepository {
 
         return foundUsers;
     }
+
+    // FUTURE
+
+    // async findByFilters(filters: Record<string, string | { $in: string[] }>): Promise<TimestampedDocument<IUser>[]> {
+    //     const foundUsers = await userModel
+    //         .find(filters)
+    //         .sort({ createdAt: -1 });
+
+    //     return foundUsers;
+    // }
 }
 
 export = new UserRepository();

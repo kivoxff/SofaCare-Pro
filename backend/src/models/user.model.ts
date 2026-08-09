@@ -19,7 +19,7 @@ const UserSchema: Schema = new mongoose.Schema<WithTimestamps<IUser>>({
         type: String,
         required: true
     },
-    profilePicture: {
+    profileImage: {
         type: String,
         default: null
     },

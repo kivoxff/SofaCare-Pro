@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
 import type { RequestWithUser, Role } from "../types/user.interface";
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 import environment = require("../config/env");
 import { type JwtPayload } from "jsonwebtoken"
 import jwt = require("jsonwebtoken");

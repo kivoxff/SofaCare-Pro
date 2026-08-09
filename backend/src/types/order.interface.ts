@@ -1,6 +1,6 @@
-import { type Types } from "mongoose";
+// import { type Types } from "mongoose";
 
-export type RequestStatus =
+export type OrderStatus =
     | "pending"
     | "approved"
     | "rejected"
@@ -9,12 +9,11 @@ export type RequestStatus =
     | "review"
     | "reclean"
     | "completed"
-    | "closed";
 
 export type SofaStatus = "pending" | "completed" | "reclean-required";
 
 export interface IStatusEvent {
-    step: RequestStatus;
+    step: OrderStatus;
     label: string;
     icon: string;
     timestamp: Date;
@@ -30,10 +29,11 @@ export interface ISofaItem {
     };
 }
 
-export interface ICleaningRequest {
+export interface IOrder {
     customer: { id: string, fullName: string };
+    customerAddress: string;
     cleaningType: string;
-    overallStatus: RequestStatus;
+    orderStatus: OrderStatus;
     fieldCleaner: { id: string | null, fullName: string | null };
     manager: { id: string | null, fullName: string | null };
     cleaningDate: Date | null;
@@ -44,18 +44,18 @@ export interface ICleaningRequest {
 
 export interface IDashboardStats {
     _id: string;
-    overview: {
-        totalRequests: number;
-        pendingRequests: number;
-        inProgressRequests: number;
-        reviewRequests: number;
-        recleanRequests: number;
-        closedRequests: number;
+    orders: {
+        totalOrders: number;
+        pendingOrders: number;
+        inProgressOrders: number;
+        reviewOrders: number;
+        recleanOrders: number;
+        completedOrders: number;
     };
-    financials: {
+    revenue: {
         totalRevenue: number;
     };
-    quality: {
+    sofas: {
         totalSofasCleaned: number;
         recleanSofasCount: number;
     };

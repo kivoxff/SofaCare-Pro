@@ -1,18 +1,30 @@
 import type { Request, Response, NextFunction } from "express";
 import type { RegisterDTO, RegisterResponseDTO, LoginDTO, LoginResponseDTO } from "../dto/auth.dto";
-import authService = require("../services/auth.service");
 import { type IUser } from "../types/user.interface";
 import { type TimestampedDocument } from "../types/mongoose.types";
+import { type RequestWithUser } from "../types/user.interface";
+import authService = require("../services/auth.service");
+import AppError = require("../utils/appError");
+import environment = require("../config/env");
 
 class AuthController {
     async register(req: Request, res: Response, next: NextFunction) {
         try {
             // Request 
             const registerData: RegisterDTO = req.body;
-            const profilePictureFile: Express.Multer.File | undefined = req.file;
+            const profileImageFile: Express.Multer.File | undefined = req.file;
+
+            // Validation
+            if (!registerData.email || !registerData.password) {
+                throw new AppError(400, "Bad Request: Email and password are required.");
+            }
+
+            if(!registerData.fullName) {
+                throw new AppError(400, "Bad Request: Full name is required.");
+            }
 
             // Service call
-            const registeredUser: TimestampedDocument<IUser> = await authService.register(registerData, profilePictureFile);
+            const registeredUser: TimestampedDocument<IUser> = await authService.register(registerData, profileImageFile);
 
             // Response
             const registerResponse: RegisterResponseDTO = {
@@ -20,8 +32,8 @@ class AuthController {
                 email: registeredUser.email,
                 fullName: registeredUser.fullName,
                 role: registeredUser.role,
-                profilePicture: registeredUser.profilePicture,
-                createdAt: registeredUser.createdAt
+                profileImage: registeredUser.profileImage,
+                createdAt: registeredUser.createdAt.toISOString()
             }
 
             res.status(201).json({
@@ -41,6 +53,11 @@ class AuthController {
             // Request
             const loginData: LoginDTO = req.body;
 
+             // Validation
+            if (!loginData.email || !loginData.password) {
+                throw new AppError(400, "Bad Request: Email and password are required.");
+            }
+
             // Service call
             const { loggedInUser, accessToken }: { loggedInUser: TimestampedDocument<IUser>, accessToken: string } = await authService.login(loginData);
 
@@ -49,16 +66,16 @@ class AuthController {
                 id: loggedInUser.id,
                 fullName: loggedInUser.fullName,
                 email: loggedInUser.email,
-                profilePicture: loggedInUser.profilePicture,
+                profileImage: loggedInUser.profileImage,
                 role: loggedInUser.role,
-                createdAt: loggedInUser.createdAt,
+                createdAt: loggedInUser.createdAt.toISOString(),
             }
 
             // Set-Cookie
             res.cookie("token", accessToken, {
                 httpOnly: true, // Prevents JavaScript from reading the cookie (XSS protection)
-                secure: false, // Requires HTTPS in production
-                sameSite: "strict", // Protects against Cross-Site Request Forgery (CSRF)
+                secure: environment.cookieSecure, // Requires HTTPS in production
+                sameSite: environment.cookieSameSite, // Protects against Cross-Site Request Forgery (CSRF)
                 maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds (match this to JWT expiration)
             })
 
@@ -89,6 +106,37 @@ class AuthController {
             })
         } catch (err) {
             console.error("User logout failed:", err);
+            next(err);
+        }
+    }
+
+    async getMe(req: RequestWithUser, res: Response, next: NextFunction) {
+        try {
+            // Extra safety check after requireAuth
+            if (!req.user || !req.user.id) {
+                throw new AppError(401, "Unauthenticated: User context missing.");
+            }
+
+            // Service call
+            const loggedInUser: TimestampedDocument<IUser> = await authService.getMe(req.user.id);
+
+            const responseData: LoginResponseDTO = {
+                id: loggedInUser._id.toString(),
+                email: loggedInUser.email,
+                fullName: loggedInUser.fullName,
+                role: loggedInUser.role,
+                profileImage: loggedInUser.profileImage,
+                createdAt: loggedInUser.createdAt.toISOString()
+            }
+
+            res.status(200).json({
+                success: true,
+                message: "Current user fetched successfully",
+                data: responseData
+            });
+
+        } catch (err) {
+            console.error("Fetching current user failed:", err);
             next(err);
         }
     }

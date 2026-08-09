@@ -1,6 +1,6 @@
 import type { RequestWithUser } from "../types/user.interface";
 import type { Response, NextFunction } from "express";
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 import { type Role } from "../types/user.interface";
 import { type IUser } from "../types/user.interface";
 import { type TimestampedDocument } from "../types/mongoose.types";
@@ -62,6 +62,8 @@ class UserController {
                 throw new AppError(401, "Unauthenticated: Please log in again.");
             }
 
+            const requesterRole: Role = req.user.role;
+
             if (!req.params.role || typeof req.params.role !== "string") {
                 throw new AppError(400, "Bad Request: Invalid user role.");
             }
@@ -73,7 +75,7 @@ class UserController {
                 throw new AppError(400, "Bad Request: Invalid user role.");
             }
 
-            const foundUsers: TimestampedDocument<IUser>[] = await userService.getUsersByRole(requestedRole);
+            const foundUsers: TimestampedDocument<IUser>[] = await userService.getUsersByRole(requestedRole, requesterRole);
 
             const responseData: WithTimestamps<UserResponseDTO>[] = foundUsers.map((user: TimestampedDocument<IUser>) => ({
                 id: user._id.toString(),

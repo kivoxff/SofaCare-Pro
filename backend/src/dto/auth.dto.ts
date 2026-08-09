@@ -8,7 +8,7 @@ export interface LoginDTO {
 export interface RegisterDTO extends LoginDTO {
     fullName: string,
     role: Role
-    // profilePicture is intentionally omitted here as it comes from req.file (Multer), not req.body
+    // profileImage is intentionally omitted here as it comes from req.file (Multer), not req.body
 }
 
 export interface RegisterResponseDTO {
@@ -16,8 +16,8 @@ export interface RegisterResponseDTO {
     fullName: string;
     email: string;
     role: Role;
-    profilePicture: string | null;
-    createdAt: Date;
+    profileImage: string | null;
+    createdAt: string; // // ISO Date string
 }
 
 export interface LoginResponseDTO extends RegisterResponseDTO {

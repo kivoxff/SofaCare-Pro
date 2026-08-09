@@ -1,6 +1,6 @@
 import ImageKit = require("@imagekit/nodejs")
 import environment = require("../config/env")
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 
 class ImageService {
     async uploadImage(fileBuffer: Buffer, fileName: string, folderName: string): Promise<string> {

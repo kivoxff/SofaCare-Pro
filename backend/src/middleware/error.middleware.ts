@@ -1,4 +1,4 @@
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 import { type ErrorRequestHandler } from "express";
 
 // class ErrorHandler {

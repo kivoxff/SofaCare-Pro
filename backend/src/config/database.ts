@@ -8,7 +8,7 @@ dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 const connectDB = async (): Promise<void> => {
     try {
-        const conn: Mongoose = await mongoose.connect(environment.mongoUrl);
+        const conn: Mongoose = await mongoose.connect(environment.mongodbUrl);
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (err) {
         console.error("MongoDB Connection Error:", err);

@@ -1,6 +1,6 @@
 import mongoose = require("mongoose");
 import { type Schema } from "mongoose";
-import type { IStatusEvent, ISofaItem, ICleaningRequest } from "../types/request.interface";
+import type { IStatusEvent, ISofaItem, IOrder } from "../types/order.interface";
 
 const StatusEventsSchema: Schema = new mongoose.Schema<IStatusEvent>({
     step: { type: String, required: true },
@@ -24,17 +24,18 @@ const SofaItemSchema: Schema = new mongoose.Schema<ISofaItem>({
     }
 }, { _id: false });
 
-const CleaningRequestSchema: Schema = new mongoose.Schema<ICleaningRequest>({
+const CleaningOrderSchema: Schema = new mongoose.Schema<IOrder>({
     customer: {
         id: { type: String, required: true },
         fullName: { type: String, required: true }
     },
+    customerAddress: { type: String, required: true },
     cleaningType: { type: String, required: true },
-    overallStatus: {
+    orderStatus: {
         type: String,
         required: true,
         default: "pending",
-        enum: ["pending", "approved", "rejected", "assigned", "in-progress", "review", "reclean", "completed", "closed"]
+        enum: ["pending", "approved", "rejected", "assigned", "in-progress", "review", "reclean", "completed"]
     },
     fieldCleaner: {
         id: { type: String, default: null },
@@ -50,4 +51,4 @@ const CleaningRequestSchema: Schema = new mongoose.Schema<ICleaningRequest>({
     sofas: [SofaItemSchema],
 })
 
-export = mongoose.model<ICleaningRequest>("CleaningRequest", CleaningRequestSchema);
+export = mongoose.model<IOrder>("CleaningOrder", CleaningOrderSchema);

@@ -6,32 +6,32 @@ import imageService = require("./image.service");
 import bcrypt = require("bcryptjs");
 import environment = require("../config/env");
 import jwt = require("jsonwebtoken");
-import AppError = require("../utils/AppError");
+import AppError = require("../utils/appError");
 
 class AuthService {
-    //  async uploadProfilePicture(profilePictureFile: Express.Multer.File | undefined): Promise<string | null> {
-    //     if (!profilePictureFile) return null;
+    //  async uploadProfileImage(profileImageFile: Express.Multer.File | undefined): Promise<string | null> {
+    //     if (!profileImageFile) return null;
 
     //     return imageService.uploadImage(
-    //         profilePictureFile.buffer,
-    //         profilePictureFile.originalname,
+    //         profileImageFile.buffer,
+    //         profileImageFile.originalname,
     //         "profile_pictures"
     //     );
     // }
 
-    // const profilePictureUrl: string | null = await this.uploadProfilePicture(profilePictureFile);
+    // const profileImageUrl: string | null = await this.uploadProfileImage(profileImageFile);
 
-    async register(registerData: RegisterDTO, profilePictureFile: Express.Multer.File | undefined): Promise<TimestampedDocument<IUser>> {
+    async register(registerData: RegisterDTO, profileImageFile: Express.Multer.File | undefined): Promise<TimestampedDocument<IUser>> {
         // Check if user already exist
         const existingUser: TimestampedDocument<IUser> | null = await userRepository.findByEmail(registerData.email);
         if (existingUser) throw new AppError(409, "Conflict: User with this email already exists.");
 
         // Upload profile picture if exist
-        let profilePictureUrl: string | null = null;
-        if (profilePictureFile) {
-            profilePictureUrl = await imageService.uploadImage(
-                profilePictureFile.buffer,
-                profilePictureFile.originalname,
+        let profileImageUrl: string | null = null;
+        if (profileImageFile) {
+            profileImageUrl = await imageService.uploadImage(
+                profileImageFile.buffer,
+                profileImageFile.originalname,
                 "profile_pictures"
             )
         }
@@ -46,7 +46,7 @@ class AuthService {
             ...registerData,
             role: "Customer", // Default value
             password: hashedPassword,
-            profilePicture: profilePictureUrl
+            profileImage: profileImageUrl
         })
 
         return registeredUser;
@@ -71,6 +71,16 @@ class AuthService {
         return { loggedInUser: foundUser, accessToken }
     }
 
+    async getMe(userId: string): Promise<TimestampedDocument<IUser>> {
+        // Grab the fresh user data
+        const currentUser: TimestampedDocument<IUser> | null = await userRepository.findById(userId);
+        
+        if (!currentUser) {
+            throw new AppError(404, "Resource: User does not exist.");
+        }
+
+        return currentUser;
+    }
 }
 
 export = new AuthService();
